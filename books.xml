@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<library>
+  <book id="2">
+    <title>To Kill a Mockingbird</title>
+    <author>Harper Lee</author>
+    <year>1960</year>
+  </book>
+  <book id="3">
+    <title>The Catcher in the Rye</title>
+    <author>J.D. Salinger</author>
+    <year>1951</year>
+  </book>
+  <book id="4">
+    <title>Luda</title>
+    <author>R. Mamitiana</author>
+    <year>2002</year>
+  </book>
+  <book id="5">
+    <title>Luda</title>
+    <author>Lauréanne</author>
+    <year>2002</year>
+  </book>
+  <book id="7">
+    <title>Haha</title>
+    <author>kzqj</author>
+    <year>20313</year>
+  </book>
+  <book id="8">
+    <title>M'lay</title>
+    <author>Louda</author>
+    <year>2023</year>
+  </book>
+  <book id="9">
+    <title>LOLITA</title>
+    <author>kqsjdh</author>
+    <year>2023</year>
+  </book>
+</library>
