@@ -8,32 +8,41 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.listen(3000, function() {
+  console.log('Le serveur est en marche sur le port 3000');
+  console.log('=> ' + getMAX())
+});
+
+
+/********************************** URL **********************************/
+
+// Index
 app.get('/', function (req, res) {
   fs.readFile("./public/index.html", "UTF-8", function(err, data) {
     const $ = cheerio.load(data);
 
-    $('#form').html(getForm({
+    $('#form').html(getHTMLForm({
       action : 'create',
       id : Number(getMAX()) + 1,
       title : '',
       author: '',
       year: new Date().getFullYear()
     }));
-    $('#data').html(getData());
+    $('#data').html(getHTMLRows());
 
     res.writeHead(200, { 'Content-Type': 'text/html'});
     res.end($.html());
   });
 })
 
+// Recherche
 app.post('/search', function (req, res) {
   fs.readFile("./public/index.html", "UTF-8", function(err, data) {
     const $ = cheerio.load(data);
     let tab = "";
-    const xml = fs.readFileSync('books.xml', 'utf-8');
     let search_txt = req.body.search;
 
-    $('#form').html(getForm({
+    $('#form').html(getHTMLForm({
       action : 'create',
       id : Number(getMAX()) + 1,
       title : '',
@@ -42,7 +51,7 @@ app.post('/search', function (req, res) {
     }));
 
     // Parse the XML data into a JavaScript object
-    xml2js.parseString(xml, (err, result) => {
+    xml2js.parseString(getXML(), (err, result) => {
         if (err) {
           console.error(err);
           return;
@@ -53,18 +62,18 @@ app.post('/search', function (req, res) {
         books.forEach(book => {
           if(
               String(book.$.id).toLowerCase().includes(search_txt.toLowerCase()) ||
-              String(book.title[0]).toLowerCase().includes(search_txt.toLowerCase()) ||
-              String(book.author[0]).toLowerCase().includes(search_txt.toLowerCase()) ||
-              String(book.year[0]).toLowerCase().includes(search_txt.toLowerCase())
+              String(book.title).toLowerCase().includes(search_txt.toLowerCase()) ||
+              String(book.author).toLowerCase().includes(search_txt.toLowerCase()) ||
+              String(book.year).toLowerCase().includes(search_txt.toLowerCase())
           ){
             tab += "<tr>" +
                       "<td>" + book.$.id + "</td>" +
-                      "<td>" + book.title[0] + "</td>" +
-                      "<td>" + book.author[0] + "</td>" +
-                      "<td>" + book.year[0] + "</td>" +
+                      "<td>" + book.title + "</td>" +
+                      "<td>" + book.author + "</td>" +
+                      "<td>" + book.year + "</td>" +
                       "<td>" + 
-                        "<a href='edit?id=" + book.$.id[0] + "&title=" + book.title[0] + "&author=" + book.author[0] + "&year=" + book.year[0] + "'>Edit</a>" +
-                        " <a href='/delete?id=" + book.$.id[0] + "'>Supprimer</a>" +
+                        "<a href='edit?id=" + book.$.id + "&title=" + book.title + "&author=" + book.author + "&year=" + book.year + "'>Edit</a>" +
+                        " <a href='/delete?id=" + book.$.id + "'>Supprimer</a>" +
                       "</td>" +
                   "</tr>";
           }
@@ -78,32 +87,35 @@ app.post('/search', function (req, res) {
   });
 })
 
-app.get('/delete', function (req, res) {
-  // ID via GET
-  let id = req.query.id;
-  deleteData(id);
-
-  res.redirect('/');
-});
-
+// Edition
 app.get('/edit', function (req, res) {
   fs.readFile("./public/index.html", "UTF-8", function(err, data) {
     const $ = cheerio.load(data);
 
-    $('#form').html(getForm({
+    $('#form').html(getHTMLForm({
       action : 'update',
       id : req.query.id,
       title : req.query.title,
       author: req.query.author,
       year: req.query.year
     }));
-    $('#data').html(getData());
+    $('#data').html(getHTMLRows());
 
     res.writeHead(200, { 'Content-Type': 'text/html'});
     res.end($.html());
   });
 });
 
+// Suppréssion
+app.get('/delete', function (req, res) {
+  // ID via GET
+  let id = req.query.id;
+  destroy(id);
+
+  res.redirect('/');
+});
+
+// Ajout
 app.post('/create', function (req, res) {
   const data = {
     'id' : req.body.id,
@@ -112,11 +124,12 @@ app.post('/create', function (req, res) {
     'year' : req.body.year
   }
 
-  addData(data);
+  create(data);
 
   res.redirect('/');
-})
+});
 
+// Mise à jour
 app.post('/update', function (req, res) {
   const data = {
     'id' : req.body.id,
@@ -125,21 +138,23 @@ app.post('/update', function (req, res) {
     'year' : req.body.year
   }
 
-  updateData(data);
+  update(data);
 
   res.redirect('/');
 })
 
-app.listen(3000, function() {
-  console.log('Le serveur est en marche sur le port 3000');
-});
 
+/***************************************** FONCTIONS *****************************************/
 
-////////////////////////////////////////////////////////////////////////////////////////////
+// Une fonction pour retourner les données dans le fichier XML
+function getXML() {
+  return fs.readFileSync('books.xml', 'utf-8');
+}
 
-function getForm(data) {
+// Une fonction pour retourner la form (innerHTML)
+function getHTMLForm(data) {
   return '<form action="/' + data.action + '" method="post">' +
-            '<input type="number" name="id" id="id" value="' + data.id + '">' +
+            '<input type="number" name="id" id="id" placeholder="ID" value="' + data.id + '">' +
             '<input type="text" name="title" id="title" value="' + data.title + '">' +
             '<input type="text" name="author" id="author" value="' + data.author + '">' +
             '<input type="number" name="year" id="year" value="' + data.year + '">' +
@@ -148,12 +163,12 @@ function getForm(data) {
           '</form>';
 }
 
+// Une fonction pour prendre l'ID maximum du livre
 function getMAX() {
   let MAX = 0;
-  const xml = fs.readFileSync('books.xml', 'utf-8');
 
   // Parse the XML data into a JavaScript object
-  xml2js.parseString(xml, (err, result) => {
+  xml2js.parseString(getXML(), (err, result) => {
       if (err) {
         console.error(err);
         return;
@@ -162,20 +177,20 @@ function getMAX() {
       // Access the XML data as a JavaScript object
       books = result.library.book;
       books.forEach(book => {
-        MAX = book.$.id > MAX ? book.$.id : MAX;
+        console.log(book.$.id + ' > ' + MAX + ' ? ' + book.$.id + ' : ' + MAX);
+        MAX = Number(book.$.id) > Number(MAX) ? book.$.id : MAX;
       });
   });
 
   return MAX;
 }
 
-// READ
-function getData() {
-  let books = "", tab = "";
-  const xml = fs.readFileSync('books.xml', 'utf-8');
+// Une fonction pour retourner les lignes montrant tous les livres (innerHTML)
+function getHTMLRows() {
+  let books = "", rows = "";
 
   // Parse the XML data into a JavaScript object
-  xml2js.parseString(xml, (err, result) => {
+  xml2js.parseString(getXML(), (err, result) => {
       if (err) {
         console.error(err);
         return;
@@ -184,67 +199,67 @@ function getData() {
       // Access the XML data as a JavaScript object
       books = result.library.book;
       books.forEach(book => {
-        tab += "<tr>" +
+        rows += "<tr>" +
                   "<td>" + book.$.id + "</td>" +
-                  "<td>" + book.title[0] + "</td>" +
-                  "<td>" + book.author[0] + "</td>" +
-                  "<td>" + book.year[0] + "</td>" +
+                  "<td>" + book.title + "</td>" +
+                  "<td>" + book.author + "</td>" +
+                  "<td>" + book.year + "</td>" +
                   "<td>" + 
-                    "<a href='edit?id=" + book.$.id[0] + "&title=" + book.title[0] + "&author=" + book.author[0] + "&year=" + book.year[0] + "'>Edit</a>" +
-                    " <a href='/delete?id=" + book.$.id[0] + "'>Supprimer</a>" +
+                    "<a href='edit?id=" + book.$.id + "&title=" + book.title + "&author=" + book.author + "&year=" + book.year + "'>Edit</a>" +
+                    " <a href='/delete?id=" + book.$.id + "'>Supprimer</a>" +
                   "</td>" +
               "</tr>";
       });
   });
 
-  return tab;
+  return rows;
 }
 
-// CREATE
-function addData(posted_data) {    
-      // read XML file
-fs.readFile('books.xml', (err, data) => {
-  if (err) {
-    console.error(err);
-    return;
-  }
-
-  // parse XML data to JavaScript object
-  xml2js.parseString(data, (err, result) => {
+// Une fonction pour insérer les données
+function create(posted_data) {  
+  fs.readFile('books.xml', (err, data) => {
     if (err) {
       console.error(err);
       return;
     }
 
-    // add new book to JavaScript object
-    const newBook = {
-      title: posted_data['title'],
-      author: posted_data['author'],
-      year: posted_data['year'],
-      $: {
-          id: posted_data['id']
-      }
-    };
-    result.library.book.push(newBook);
-
-    // convert JavaScript object back to XML data
-    const builder = new xml2js.Builder();
-    const xml = builder.buildObject(result);
-
-    // write XML data to file
-    fs.writeFile('books.xml', xml, (err) => {
+    // parse XML data to JavaScript object
+    xml2js.parseString(data, (err, result) => {
       if (err) {
         console.error(err);
         return;
       }
-      console.log('Data added to books.xml');
+
+      // add new book to JavaScript object
+      const newBook = {
+        title: posted_data['title'],
+        author: posted_data['author'],
+        year: posted_data['year'],
+        $: {
+            id: posted_data['id']
+        }
+      };
+      result.library.book.push(newBook);
+
+      // convert JavaScript object back to XML data
+      const builder = new xml2js.Builder();
+      const xml = builder.buildObject(result);
+
+      // write XML data to file
+      fs.writeFile('books.xml', xml, (err) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+
+        console.log('Data added to books.xml');
+      });
     });
   });
-});
 }
 
-// UPDATE
-function updateData(updatedData){
+// Une fonction pour mettre à jour une donnée
+function update(posted_data){
   // Read the XML file
   fs.readFile('books.xml', function(err, data) {
     if (err) throw err;
@@ -254,12 +269,12 @@ function updateData(updatedData){
       if (err) throw err;
 
       // Find the book to edit
-      const bookIndex = result.library.book.findIndex(book => book.$.id === updatedData.id);
+      const bookIndex = result.library.book.findIndex(book => book.$.id === posted_data.id);
 
       // Modify the data
-      result.library.book[bookIndex].title = updatedData.title;
-      result.library.book[bookIndex].author = updatedData.author;
-      result.library.book[bookIndex].year = updatedData.year;
+      result.library.book[bookIndex].title = posted_data.title;
+      result.library.book[bookIndex].author = posted_data.author;
+      result.library.book[bookIndex].year = posted_data.year;
 
       // Convert the modified data back to XML
       const builder = new xml2js.Builder();
@@ -274,8 +289,8 @@ function updateData(updatedData){
   });  
 }
 
-// DELETE
-function deleteData(id){
+// Une fonction pour supprimer une donnée
+function destroy(id){
   // Load the XML file
   fs.readFile('books.xml', 'utf-8', (err, data) => {
     if (err) {
@@ -283,35 +298,36 @@ function deleteData(id){
       return;
     }
 
-  // Convert the XML data to a JavaScript object
-  xml2js.parseString(data, (err, result) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-
-    // Find the book to delete
-    const bookIndex = result.library.book.findIndex(book => book.$.id === id);
-    if (bookIndex === -1) {
-      console.log('Book not found');
-      return;
-    }
-
-    // Delete the book from the array
-    result.library.book.splice(bookIndex, 1);
-
-    // Convert the JavaScript object back to XML data
-    const builder = new xml2js.Builder();
-    const xml = builder.buildObject(result);
-
-    // Write the updated XML data to the file
-    fs.writeFile('books.xml', xml, err => {
+    // Convert the XML data to a JavaScript object
+    xml2js.parseString(data, (err, result) => {
       if (err) {
         console.error(err);
         return;
       }
-      console.log('Book deleted successfully');
+
+      // Find the book to delete
+      const bookIndex = result.library.book.findIndex(book => book.$.id === id);
+      if (bookIndex === -1) {
+        console.log('Book not found');
+        return;
+      }
+
+      // Delete the book from the array
+      result.library.book.splice(bookIndex, 1);
+
+      // Convert the JavaScript object back to XML data
+      const builder = new xml2js.Builder();
+      const xml = builder.buildObject(result);
+
+      // Write the updated XML data to the file
+      fs.writeFile('books.xml', xml, err => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+
+        console.log('Book deleted successfully');
+      });
     });
   });
-});
 }
