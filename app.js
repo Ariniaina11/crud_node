@@ -10,7 +10,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.listen(3000, function() {
   console.log('Le serveur est en marche sur le port 3000');
-  console.log('=> ' + getMAX())
 });
 
 
@@ -21,14 +20,14 @@ app.get('/', function (req, res) {
   fs.readFile("./public/index.html", "UTF-8", function(err, data) {
     const $ = cheerio.load(data);
 
-    $('#form').html(getHTMLForm({
-      action : 'create',
-      id : Number(getMAX()) + 1,
-      title : '',
-      author: '',
-      year: new Date().getFullYear()
-    }));
-    $('#data').html(getHTMLRows());
+    // Form
+    $('#form-add').attr('action', '/create');
+    $('#id').val(Number(getMAX()) + 1);
+    $('#year').val(new Date().getFullYear());
+    $('#submit').val('AJOUTER');
+
+    // Data
+    $('#tbody').html(getHTMLRows());
 
     res.writeHead(200, { 'Content-Type': 'text/html'});
     res.end($.html());
@@ -39,16 +38,17 @@ app.get('/', function (req, res) {
 app.post('/search', function (req, res) {
   fs.readFile("./public/index.html", "UTF-8", function(err, data) {
     const $ = cheerio.load(data);
-    let tab = "";
+    let rows = "";
     let search_txt = req.body.search;
 
-    $('#form').html(getHTMLForm({
-      action : 'create',
-      id : Number(getMAX()) + 1,
-      title : '',
-      author: '',
-      year: new Date().getFullYear()
-    }));
+    // Form
+    $('#form-add').attr('action', '/create');
+    $('#id').val(Number(getMAX()) + 1);
+    $('#year').val(new Date().getFullYear());
+    $('#submit').val('AJOUTER');
+
+    // Search
+    $('#search').val(search_txt);
 
     // Parse the XML data into a JavaScript object
     xml2js.parseString(getXML(), (err, result) => {
@@ -56,9 +56,10 @@ app.post('/search', function (req, res) {
           console.error(err);
           return;
         }
-    
+
         // Access the XML data as a JavaScript object
         books = result.library.book;
+
         books.forEach(book => {
           if(
               String(book.$.id).toLowerCase().includes(search_txt.toLowerCase()) ||
@@ -66,21 +67,21 @@ app.post('/search', function (req, res) {
               String(book.author).toLowerCase().includes(search_txt.toLowerCase()) ||
               String(book.year).toLowerCase().includes(search_txt.toLowerCase())
           ){
-            tab += "<tr>" +
-                      "<td>" + book.$.id + "</td>" +
-                      "<td>" + book.title + "</td>" +
-                      "<td>" + book.author + "</td>" +
-                      "<td>" + book.year + "</td>" +
-                      "<td>" + 
-                        "<a href='edit?id=" + book.$.id + "&title=" + book.title + "&author=" + book.author + "&year=" + book.year + "'>Edit</a>" +
-                        " <a href='/delete?id=" + book.$.id + "'>Supprimer</a>" +
-                      "</td>" +
-                  "</tr>";
+            rows += '<tr>' +
+                  '<td class="th_td">' + book.$.id + '</td>' +
+                  '<td class="th_td">' + book.title + '</td>' +
+                  '<td class="th_td">' + book.author + '</td>' +
+                  '<td class="th_td">' + book.year + '</td>' +
+                  '<td class="th_td">' +
+                      '<a id="edit" href="/edit?id=' + book.$.id + "&title=" + book.title + "&author=" + book.author + "&year=" + book.year + '">Editer</a>' +
+                      '<a id="delete" href="/delete?id=' + book.$.id + '">Supprimer</a>' +
+                  '</td>' +
+              '</tr>';
           }
         });
     });
 
-    $('#data').html(tab);
+    $('#tbody').html(rows);
 
     res.writeHead(200, { 'Content-Type': 'text/html'});
     res.end($.html());
@@ -92,14 +93,16 @@ app.get('/edit', function (req, res) {
   fs.readFile("./public/index.html", "UTF-8", function(err, data) {
     const $ = cheerio.load(data);
 
-    $('#form').html(getHTMLForm({
-      action : 'update',
-      id : req.query.id,
-      title : req.query.title,
-      author: req.query.author,
-      year: req.query.year
-    }));
-    $('#data').html(getHTMLRows());
+    // Form
+    $('#form-add').attr('action', '/update');
+    $('#id').val(req.query.id);
+    $('#title').val(req.query.title);
+    $('#author').val(req.query.author);
+    $('#year').val(req.query.year);
+    $('#submit').val('MODIFIER');
+
+    // Data
+    $('#tbody').html(getHTMLRows());
 
     res.writeHead(200, { 'Content-Type': 'text/html'});
     res.end($.html());
@@ -151,18 +154,6 @@ function getXML() {
   return fs.readFileSync('books.xml', 'utf-8');
 }
 
-// Une fonction pour retourner la form (innerHTML)
-function getHTMLForm(data) {
-  return '<form action="/' + data.action + '" method="post">' +
-            '<input type="number" name="id" id="id" placeholder="ID" value="' + data.id + '">' +
-            '<input type="text" name="title" id="title" value="' + data.title + '">' +
-            '<input type="text" name="author" id="author" value="' + data.author + '">' +
-            '<input type="number" name="year" id="year" value="' + data.year + '">' +
-
-            '<input type="submit" value="VALIDER">' +
-          '</form>';
-}
-
 // Une fonction pour prendre l'ID maximum du livre
 function getMAX() {
   let MAX = 0;
@@ -173,11 +164,10 @@ function getMAX() {
         console.error(err);
         return;
       }
-  
+
       // Access the XML data as a JavaScript object
       books = result.library.book;
       books.forEach(book => {
-        console.log(book.$.id + ' > ' + MAX + ' ? ' + book.$.id + ' : ' + MAX);
         MAX = Number(book.$.id) > Number(MAX) ? book.$.id : MAX;
       });
   });
@@ -195,20 +185,20 @@ function getHTMLRows() {
         console.error(err);
         return;
       }
-  
+
       // Access the XML data as a JavaScript object
       books = result.library.book;
       books.forEach(book => {
-        rows += "<tr>" +
-                  "<td>" + book.$.id + "</td>" +
-                  "<td>" + book.title + "</td>" +
-                  "<td>" + book.author + "</td>" +
-                  "<td>" + book.year + "</td>" +
-                  "<td>" + 
-                    "<a href='edit?id=" + book.$.id + "&title=" + book.title + "&author=" + book.author + "&year=" + book.year + "'>Edit</a>" +
-                    " <a href='/delete?id=" + book.$.id + "'>Supprimer</a>" +
-                  "</td>" +
-              "</tr>";
+        rows += '<tr>' +
+                  '<td class="th_td">' + book.$.id + '</td>' +
+                  '<td class="th_td">' + book.title + '</td>' +
+                  '<td class="th_td">' + book.author + '</td>' +
+                  '<td class="th_td">' + book.year + '</td>' +
+                  '<td class="th_td">' +
+                      '<a id="edit" href="/edit?id=' + book.$.id + "&title=" + book.title + "&author=" + book.author + "&year=" + book.year + '">Editer</a>' +
+                      '<a id="delete" href="/delete?id=' + book.$.id + '">Supprimer</a>' +
+                  '</td>' +
+              '</tr>';
       });
   });
 
@@ -216,7 +206,7 @@ function getHTMLRows() {
 }
 
 // Une fonction pour insérer les données
-function create(posted_data) {  
+function create(posted_data) {
   fs.readFile('books.xml', (err, data) => {
     if (err) {
       console.error(err);
@@ -239,6 +229,8 @@ function create(posted_data) {
             id: posted_data['id']
         }
       };
+
+      console.log(result.library.book)
       result.library.book.push(newBook);
 
       // convert JavaScript object back to XML data
@@ -286,7 +278,7 @@ function update(posted_data){
         console.log('Successfully updated XML data.');
       });
     });
-  });  
+  });
 }
 
 // Une fonction pour supprimer une donnée
