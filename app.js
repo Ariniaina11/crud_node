@@ -23,7 +23,6 @@ app.get('/', function (req, res) {
     // Form
     $('#form-add').attr('action', '/create');
     $('#id').val(Number(getMAX()) + 1);
-    $('#year').val(new Date().getFullYear());
     $('#submit').val('AJOUTER');
 
     // Data
@@ -44,8 +43,10 @@ app.post('/search', function (req, res) {
     // Form
     $('#form-add').attr('action', '/create');
     $('#id').val(Number(getMAX()) + 1);
-    $('#year').val(new Date().getFullYear());
     $('#submit').val('AJOUTER');
+
+    // Title
+    $('#typing-text').text('RECHERCHE');
 
     // Search
     $('#search').val(search_txt);
@@ -93,8 +94,16 @@ app.get('/edit', function (req, res) {
   fs.readFile("./public/index.html", "UTF-8", function(err, data) {
     const $ = cheerio.load(data);
 
+    // Add btn
+    $('#show').attr('class', 'none');
+
+    // Title
+    $('#typing-text').text('MODIFICATION');
+
     // Form
     $('#form-add').attr('action', '/update');
+    $('#form-add').attr('style', 'opacity:1;');
+    $('#form-add').attr('class', 'block');
     $('#id').val(req.query.id);
     $('#title').val(req.query.title);
     $('#author').val(req.query.author);
@@ -230,7 +239,6 @@ function create(posted_data) {
         }
       };
 
-      console.log(result.library.book)
       result.library.book.push(newBook);
 
       // convert JavaScript object back to XML data

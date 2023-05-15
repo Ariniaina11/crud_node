@@ -3,7 +3,7 @@
   <book id="3">
     <title>The Catcher in the Rye</title>
     <author>J.D. Salinger</author>
-    <year>1957</year>
+    <year>1960</year>
   </book>
   <book id="4">
     <title>Luda</title>
@@ -12,32 +12,32 @@
   </book>
   <book id="7">
     <title>Haha</title>
-    <author>kzqj jh</author>
+    <author>Kajin</author>
     <year>2013</year>
   </book>
   <book id="8">
     <title>M'lay</title>
-    <author>Louda</author>
-    <year>2023</year>
-  </book>
-  <book id="10">
-    <title>sdjhg</title>
-    <author>jqgs</author>
-    <year>2022</year>
-  </book>
-  <book id="11">
-    <title>Sans titre</title>
     <author>Luda</author>
     <year>2023</year>
   </book>
   <book id="13">
-    <title>sqkjd</title>
-    <author>kqsjd</author>
+    <title>Haicon</title>
+    <author>Bissiye</author>
     <year>2023</year>
   </book>
   <book id="14">
-    <title>LOLITA</title>
+    <title>Lolita</title>
     <author>Justine</author>
+    <year>2023</year>
+  </book>
+  <book id="15">
+    <title>Metaminer Mada</title>
+    <author>Love S.</author>
+    <year>2023</year>
+  </book>
+  <book id="16">
+    <title>Love you</title>
+    <author>Andress</author>
     <year>2023</year>
   </book>
 </library>
