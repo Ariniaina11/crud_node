@@ -15,9 +15,9 @@ app.listen(3000, function() {
 
 /********************************** URL **********************************/
 
-// Index
+// INDEX
 app.get('/', function (req, res) {
-  fs.readFile("./public/index.html", "UTF-8", function(err, data) {
+  fs.readFile("index.html", "UTF-8", function(err, data) {
     const $ = cheerio.load(data);
 
     // Form
@@ -33,9 +33,9 @@ app.get('/', function (req, res) {
   });
 })
 
-// Recherche
+// RECHERCHE
 app.post('/search', function (req, res) {
-  fs.readFile("./public/index.html", "UTF-8", function(err, data) {
+  fs.readFile("index.html", "UTF-8", function(err, data) {
     const $ = cheerio.load(data);
     let rows = "";
     let search_txt = req.body.search;
@@ -51,16 +51,17 @@ app.post('/search', function (req, res) {
     // Search
     $('#search').val(search_txt);
 
-    // Parse the XML data into a JavaScript object
+    // Analyser les données XML dans un objet JavaScript
     xml2js.parseString(getXML(), (err, result) => {
         if (err) {
           console.error(err);
           return;
         }
 
-        // Access the XML data as a JavaScript object
+        // Accéder aux données XML en tant qu’objet JavaScript
         books = result.library.book;
 
+        // 
         books.forEach(book => {
           if(
               String(book.$.id).toLowerCase().includes(search_txt.toLowerCase()) ||
@@ -69,15 +70,21 @@ app.post('/search', function (req, res) {
               String(book.year).toLowerCase().includes(search_txt.toLowerCase())
           ){
             rows += '<tr>' +
-                  '<td class="th_td">' + book.$.id + '</td>' +
-                  '<td class="th_td">' + book.title + '</td>' +
-                  '<td class="th_td">' + book.author + '</td>' +
-                  '<td class="th_td">' + book.year + '</td>' +
-                  '<td class="th_td">' +
-                      '<a id="edit" href="/edit?id=' + book.$.id + "&title=" + book.title + "&author=" + book.author + "&year=" + book.year + '">Editer</a>' +
-                      '<a id="delete" href="/delete?id=' + book.$.id + '">Supprimer</a>' +
-                  '</td>' +
-              '</tr>';
+                      '<td class="th_td">' + book.$.id + '</td>' +
+                      '<td class="th_td">' + book.title + '</td>' +
+                      '<td class="th_td">' + book.author + '</td>' +
+                      '<td class="th_td">' + book.year + '</td>' +
+                      '<td class="th_td">' +
+                        '<form action="/edit" method="post" id="form-edit">' +
+                            '<input type="hidden" name="id" value="' + book.$.id + '">' +
+                            '<input type="hidden" name="title" value="' + book.title + '">' +
+                            '<input type="hidden" name="author" value="' + book.author + '">' +
+                            '<input type="hidden" name="year" value="' + book.year + '">' +
+                            '<button id="edit" type="submit">Editer</button>' +
+                        '</form>' +
+                        '<a id="delete" href="/delete?id=' + book.$.id + '">Supprimer</a>' +
+                      '</td>' +
+                    '</tr>';
           }
         });
     });
@@ -89,26 +96,25 @@ app.post('/search', function (req, res) {
   });
 })
 
-// Edition
-app.get('/edit', function (req, res) {
-  fs.readFile("./public/index.html", "UTF-8", function(err, data) {
+// EDITION
+app.post('/edit', function (req, res) {
+  fs.readFile("index.html", "UTF-8", function(err, data) {
     const $ = cheerio.load(data);
 
-    // Add btn
+    // Add btn / mask
     $('#show').attr('class', 'none');
 
     // Title
-    $('#typing-text').text('MODIFICATION');
+    $('#typing-text').text('EDITION');
 
     // Form
     $('#form-add').attr('action', '/update');
-    $('#form-add').attr('style', 'opacity:1;');
-    $('#form-add').attr('class', 'block');
-    $('#id').val(req.query.id);
-    $('#title').val(req.query.title);
-    $('#author').val(req.query.author);
-    $('#year').val(req.query.year);
-    $('#submit').val('MODIFIER');
+    $('#form-add').attr('style', 'opacity:1;display:block;');
+    $('#id').val(req.body.id);
+    $('#title').val(req.body.title);
+    $('#author').val(req.body.author);
+    $('#year').val(req.body.year);
+    $('#submit').val('METTRE A JOUR');
 
     // Data
     $('#tbody').html(getHTMLRows());
@@ -118,7 +124,7 @@ app.get('/edit', function (req, res) {
   });
 });
 
-// Suppréssion
+// SUPPRESSION
 app.get('/delete', function (req, res) {
   // ID via GET
   let id = req.query.id;
@@ -127,7 +133,8 @@ app.get('/delete', function (req, res) {
   res.redirect('/');
 });
 
-// Ajout
+
+// AJOUT
 app.post('/create', function (req, res) {
   const data = {
     'id' : req.body.id,
@@ -141,7 +148,7 @@ app.post('/create', function (req, res) {
   res.redirect('/');
 });
 
-// Mise à jour
+// MISE A JOUR
 app.post('/update', function (req, res) {
   const data = {
     'id' : req.body.id,
@@ -160,22 +167,23 @@ app.post('/update', function (req, res) {
 
 // Une fonction pour retourner les données dans le fichier XML
 function getXML() {
-  return fs.readFileSync('books.xml', 'utf-8');
+  return fs.readFileSync('files/books.xml', 'utf-8');
 }
 
 // Une fonction pour prendre l'ID maximum du livre
 function getMAX() {
   let MAX = 0;
 
-  // Parse the XML data into a JavaScript object
+  // Analyser les données XML dans un objet JavaScript
   xml2js.parseString(getXML(), (err, result) => {
       if (err) {
         console.error(err);
         return;
       }
 
-      // Access the XML data as a JavaScript object
+      // Accéder aux données XML en tant qu’objet JavaScript
       books = result.library.book;
+
       books.forEach(book => {
         MAX = Number(book.$.id) > Number(MAX) ? book.$.id : MAX;
       });
@@ -188,15 +196,16 @@ function getMAX() {
 function getHTMLRows() {
   let books = "", rows = "";
 
-  // Parse the XML data into a JavaScript object
+  // Analyser les données XML dans un objet JavaScript
   xml2js.parseString(getXML(), (err, result) => {
       if (err) {
         console.error(err);
         return;
       }
 
-      // Access the XML data as a JavaScript object
+      // Accéder aux données XML en tant qu’objet JavaScript
       books = result.library.book;
+
       books.forEach(book => {
         rows += '<tr>' +
                   '<td class="th_td">' + book.$.id + '</td>' +
@@ -204,7 +213,13 @@ function getHTMLRows() {
                   '<td class="th_td">' + book.author + '</td>' +
                   '<td class="th_td">' + book.year + '</td>' +
                   '<td class="th_td">' +
-                      '<a id="edit" href="/edit?id=' + book.$.id + "&title=" + book.title + "&author=" + book.author + "&year=" + book.year + '">Editer</a>' +
+                      '<form action="/edit" method="post" id="form-edit">' +
+                          '<input type="hidden" name="id" value="' + book.$.id + '">' +
+                          '<input type="hidden" name="title" value="' + book.title + '">' +
+                          '<input type="hidden" name="author" value="' + book.author + '">' +
+                          '<input type="hidden" name="year" value="' + book.year + '">' +
+                          '<button id="edit" type="submit">Editer</button>' +
+                      '</form>' +
                       '<a id="delete" href="/delete?id=' + book.$.id + '">Supprimer</a>' +
                   '</td>' +
               '</tr>';
@@ -214,22 +229,32 @@ function getHTMLRows() {
   return rows;
 }
 
+// Une fonction pour écrire dans le fichier XML
+function writeOnFile(data) {
+  fs.writeFile('files/books.xml', data, (err) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+  });
+}
+
 // Une fonction pour insérer les données
 function create(posted_data) {
-  fs.readFile('books.xml', (err, data) => {
+  fs.readFile('files/books.xml', (err, data) => {
     if (err) {
       console.error(err);
       return;
     }
 
-    // parse XML data to JavaScript object
+    // Analyser les données XML dans un objet JavaScript
     xml2js.parseString(data, (err, result) => {
       if (err) {
         console.error(err);
         return;
       }
 
-      // add new book to JavaScript object
+      // Ajouter un nouveau livre en tant qu'objet Javascript
       const newBook = {
         title: posted_data['title'],
         author: posted_data['author'],
@@ -241,50 +266,38 @@ function create(posted_data) {
 
       result.library.book.push(newBook);
 
-      // convert JavaScript object back to XML data
+      // Reconvertir l'objet JS en données XML
       const builder = new xml2js.Builder();
       const xml = builder.buildObject(result);
 
-      // write XML data to file
-      fs.writeFile('books.xml', xml, (err) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-
-        console.log('Data added to books.xml');
-      });
+      // Ecrire les données XML dans le fichier XML
+      writeOnFile(xml);
     });
   });
 }
 
 // Une fonction pour mettre à jour une donnée
 function update(posted_data){
-  // Read the XML file
-  fs.readFile('books.xml', function(err, data) {
+  fs.readFile('files/books.xml', function(err, data) {
     if (err) throw err;
 
-    // Parse the XML data
+    // Analyser les données XML
     xml2js.parseString(data, function(err, result) {
       if (err) throw err;
 
-      // Find the book to edit
+      // L'index du livre à éditer
       const bookIndex = result.library.book.findIndex(book => book.$.id === posted_data.id);
 
-      // Modify the data
+      // Modifier les données
       result.library.book[bookIndex].title = posted_data.title;
       result.library.book[bookIndex].author = posted_data.author;
       result.library.book[bookIndex].year = posted_data.year;
 
-      // Convert the modified data back to XML
+      // Convertir l'objet JS en données XML
       const builder = new xml2js.Builder();
       const xml = builder.buildObject(result);
 
-      // Write the updated XML data to the file
-      fs.writeFile('books.xml', xml, function(err) {
-        if (err) throw err;
-        console.log('Successfully updated XML data.');
-      });
+      writeOnFile(xml);
     });
   });
 }
@@ -292,42 +305,35 @@ function update(posted_data){
 // Une fonction pour supprimer une donnée
 function destroy(id){
   // Load the XML file
-  fs.readFile('books.xml', 'utf-8', (err, data) => {
+  fs.readFile('files/books.xml', 'utf-8', (err, data) => {
     if (err) {
       console.error(err);
       return;
     }
 
-    // Convert the XML data to a JavaScript object
+    // Convertir les données XML en objet JavaScript
     xml2js.parseString(data, (err, result) => {
       if (err) {
         console.error(err);
         return;
       }
 
-      // Find the book to delete
+      // L'index du livre à éditer
       const bookIndex = result.library.book.findIndex(book => book.$.id === id);
+
       if (bookIndex === -1) {
         console.log('Book not found');
         return;
       }
 
-      // Delete the book from the array
+      // Supprimer le livre
       result.library.book.splice(bookIndex, 1);
 
-      // Convert the JavaScript object back to XML data
+      // Convertir l'objet JavaScript en données XML
       const builder = new xml2js.Builder();
       const xml = builder.buildObject(result);
 
-      // Write the updated XML data to the file
-      fs.writeFile('books.xml', xml, err => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-
-        console.log('Book deleted successfully');
-      });
+      writeOnFile(xml);
     });
   });
 }

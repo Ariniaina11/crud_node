@@ -91,6 +91,7 @@
             padding: 2px;
             width: 80%;
             border-collapse: collapse;
+            box-shadow: 1px 1px 10px gray;
         }
         .th_td{
             padding: 5px;
@@ -107,6 +108,9 @@
         td{
             color: rgb(59, 59, 59);
         }
+        #form-edit{
+            display: inline;
+        }
         #edit, #delete{
             text-decoration: none;
             border-radius: 4px;
@@ -115,11 +119,13 @@
             color: rgba(70, 40, 207, 0.9);
             font-size: 13px;
             transition: 0.5s;
+            cursor: pointer;
         }
         #delete{
             border : 1px solid rgba(207, 40, 104, 0.9);
             color: rgba(207, 40, 104, 0.9);
             margin-left: 5px;
+            padding-top: .2px;
         }
         #edit:hover{
             color: rgb(216, 216, 209);
@@ -169,10 +175,11 @@
             background-color: rgb(120, 35, 131);
         }
         @keyframes typing {
-        from { width: 0; }
+            from { width: 0; }
         }
 
     </style>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
 </head>
 <body>
     <h1 class="text-center title" id="typing-text" onclick="home()">CRUD XML & Node.JS</h1>
@@ -206,8 +213,11 @@
             <th class="th_td">Année</th>
             <th class="th_td">Action</th>
         </thead>
-        <tbody id="tbody"></tbody>
+        <tbody id="tbody">
+            <!-- A ajouter venant du serveur -->
+        </tbody>
     </table>
+    
 
     <script>
         function home() {
