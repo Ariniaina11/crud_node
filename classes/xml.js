@@ -42,7 +42,7 @@ class xml{
         this.cheerio = cheerio
     }
 
-    ////////////////////////
+    ////////////////////////***************************************************////////////////////////
 
     // Une fonction pour retourner les lignes montrant tous les livres (innerHTML)
     getHTMLRows(books) {
@@ -110,6 +110,95 @@ class xml{
     // Une méthode privée pour retourner les données dans le fichier XML comme String
     _XMLDataRead() {
         return this.fs.readFileSync(this.path, 'utf-8');
+    }
+
+    // Une méthode privée pour écrire dans le fichier XML
+    _writeOnFile(data) {
+        this.fs.writeFile(this.path, data, (err) => {
+            if (err) {
+                return err;
+            }
+        });
+    }
+
+    // Une méthode pour insérer les données
+    create(book) {
+        // Analyser les données XML dans un objet JavaScript
+        this.xml2js.parseString(this._XMLDataRead(), (err, result) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+
+            // Ajouter un nouveau livre en tant qu'objet Javascript
+            const newBook = {
+                title: book.Title,
+                author: book.Author,
+                year: book.Year,
+                $: {
+                    id: book.Id
+                }
+            };
+    
+            result.library.book.push(newBook);
+    
+            // Reconvertir l'objet JS en données XML
+            const builder = new this.xml2js.Builder();
+            const xml = builder.buildObject(result);
+    
+            // Ecrire les données XML dans le fichier XML
+            this._writeOnFile(xml);
+        });
+    }
+
+    // Une fonction pour mettre à jour une donnée
+    update(book_to_edit, xml2js){
+        const THIS = this
+
+        // Analyser les données XML
+        this.xml2js.parseString(this._XMLDataRead(), function(err, result) {
+            if (err) {
+                return err;
+            }
+
+            // L'index du livre à éditer
+            const bookIndex = result.library.book.findIndex(book => book.$.id === book_to_edit.Id);
+    
+            // Modifier les données
+            result.library.book[bookIndex].title = book_to_edit.title;
+            result.library.book[bookIndex].author = book_to_edit.author;
+            result.library.book[bookIndex].year = book_to_edit.year;
+    
+            // Convertir l'objet JS en données XML
+            const builder = new xml2js.Builder();
+            const xml = builder.buildObject(result);
+            
+            THIS._writeOnFile(xml);
+        });
+    }
+
+    // Une fonction pour supprimer un livre
+    destroy(book_to_delete, xml2js){
+        const THIS = this
+
+        // Convertir les données XML en objet JavaScript
+        this.xml2js.parseString(this._XMLDataRead(), (err, result) => {
+            if (err) {
+                return err;
+            }
+    
+            // L'index du livre à supprimer
+            const bookIndex = result.library.book.findIndex(book => book.$.id === book_to_delete.Id);
+    
+            // Supprimer le livre
+            result.library.book.splice(bookIndex, 1);
+    
+            // Convertir l'objet JavaScript en données XML
+            const builder = new xml2js.Builder();
+            const xml = builder.buildObject(result);
+    
+            THIS._writeOnFile(xml);
+        });
     }
 }
 

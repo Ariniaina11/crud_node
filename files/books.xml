@@ -1,43 +1,58 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <library>
-  <book id="3">
-    <title>The Catcher in the Rye</title>
-    <author>J. Salinger</author>
-    <year>1961</year>
+  <book id="28">
+    <title>KJH</title>
+    <author>kjh</author>
+    <year>1778</year>
   </book>
-  <book id="7">
-    <title>Hahahi</title>
-    <author>Kajiny</author>
-    <year>2013</year>
+  <book id="29">
+    <title>sqldkj</title>
+    <author>lkjl</author>
+    <year>0987</year>
   </book>
-  <book id="8">
-    <title>M'lay</title>
-    <author>Luda</author>
-    <year>2023</year>
+  <book id="30">
+    <title>kqsdjh</title>
+    <author>kjhk</author>
+    <year>888</year>
   </book>
-  <book id="13">
-    <title>Haicon</title>
-    <author>Bissi</author>
-    <year>2023</year>
+  <book id="31">
+    <title>j</title>
+    <author>kjh</author>
+    <year>2000</year>
   </book>
-  <book id="14">
+  <book id="32">
+    <title>joujou</title>
+    <author>jhj</author>
+    <year>2000</year>
+  </book>
+  <book id="33">
+    <title>kjh</title>
+    <author>KAjih</author>
+    <year>2003</year>
+  </book>
+  <book id="34">
     <title>Lolita</title>
-    <author>Justine</author>
-    <year>2020</year>
-  </book>
-  <book id="15">
-    <title>Metaminer Mada</title>
-    <author>Love S.</author>
-    <year>2023</year>
-  </book>
-  <book id="16">
-    <title>Love you</title>
-    <author>Andress Phonolossa</author>
-    <year>2023</year>
-  </book>
-  <book id="18">
-    <title>Apprendre le C#</title>
-    <author>LOL</author>
+    <author>Mim's</author>
     <year>2001</year>
+  </book>
+  <book id="35">
+    <title>Bournii</title>
+    <author>LOL</author>
+    <year>1778</year>
+  </book>
+  <book id="36">
+    <title>kjh</title>
+    <author>jkhkjh</author>
+    <year>1999</year>
+  </book>
+  <book id="37">
+    <title>kjhkjh</title>
+    <author>kjhkh</author>
+    <year>1576</year>
+  </book>
+  <book id="39">
+    <title>Metaminer Mada</title>
+    <author>LOL</author>
+    <year>2003</year>
   </book>
 </library>
