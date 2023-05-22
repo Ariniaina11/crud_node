@@ -1,9 +1,11 @@
+const Book = require('./book')
+
 class xml{
     constructor(){
-        this.xml2js,
-        this.fs,
-        this.path,
-        this.cheerio
+        this.xml2js,   // Une bibliothèque pour convertir du XML en objets JavaScript
+        this.fs,       // le module système de fichiers en Node.js, utilisé pour travailler avec des fichiers
+        this.path,     // Une module pour travailler avec les chemins de fichiers et de répertoires
+        this.cheerio   // Une bibliothèque similaire à jQuery pour analyser et manipuler des documents HTML ou XML
     }
 
     // Xml2js
@@ -44,7 +46,7 @@ class xml{
 
     ////////////////////////***************************************************////////////////////////
 
-    // Une fonction pour retourner les lignes montrant tous les livres (innerHTML)
+    // Une méthode pour retourner les lignes montrant tous les livres (innerHTML)
     getHTMLRows(books) {
         let rows = "";
 
@@ -105,6 +107,31 @@ class xml{
         });
 
         return results
+    }
+
+    // Une méthode pour prendre les livres voulus dans un tableau (search_txt = "" => TOUS)
+    getBookData(search_txt) {
+        let book_data = []
+
+        this.getXMLDataReadResult().forEach(b => {
+            let book = new Book()
+
+            if(
+                String(b.$.id).toLowerCase().includes(search_txt.toLowerCase()) ||
+                String(b.title).toLowerCase().includes(search_txt.toLowerCase()) ||
+                String(b.author).toLowerCase().includes(search_txt.toLowerCase()) ||
+                String(b.year).toLowerCase().includes(search_txt.toLowerCase())
+            ){
+                book.Id = b.$.id
+                book.Title = b.title
+                book.Author = b.author
+                book.Year = b.year
+        
+                book_data.push(book)
+            }
+        });
+
+        return book_data
     }
 
     // Une méthode privée pour retourner les données dans le fichier XML comme String

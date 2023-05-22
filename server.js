@@ -27,7 +27,7 @@ app.listen(3000, function () {
 
 // INDEX
 app.get('/', function (req, res) {
-    let book_data = getBookData("")
+    let book_data = myXml.getBookData("")
 
     myXml.Fs.readFile("index.html", "UTF-8", function(err, data) {
         const $ = myXml.Cheerio.load(data);
@@ -48,7 +48,7 @@ app.get('/', function (req, res) {
 // RECHERCHE
 app.post('/search', function (req, res) {
     let search_txt = req.body.search
-    let book_data = getBookData(search_txt)
+    let book_data = myXml.getBookData(search_txt)
 
     myXml.Fs.readFile("index.html", "UTF-8", function(err, data) {
         const $ = myXml.Cheerio.load(data);
@@ -76,7 +76,7 @@ app.post('/search', function (req, res) {
 app.post('/edit', function (req, res) {
     myXml.Fs.readFile("index.html", "UTF-8", function(err, data) {
         const $ = myXml.Cheerio.load(data);
-        let book_data = getBookData("")
+        let book_data = myXml.getBookData("")
     
         // Add btn / mask
         $('#show').attr('class', 'none');
@@ -137,29 +137,3 @@ app.post('/update', function (req, res) {
 
     res.redirect('/');
 });
-
-
-// Une fonction pour prendre les livre voulus (search_txt = "" => TOUS)
-function getBookData(search_txt) {
-    let book_data = []
-
-    myXml.getXMLDataReadResult().forEach(b => {
-        let book = new Book()
-
-        if(
-            String(b.$.id).toLowerCase().includes(search_txt.toLowerCase()) ||
-            String(b.title).toLowerCase().includes(search_txt.toLowerCase()) ||
-            String(b.author).toLowerCase().includes(search_txt.toLowerCase()) ||
-            String(b.year).toLowerCase().includes(search_txt.toLowerCase())
-        ){
-            book.Id = b.$.id
-            book.Title = b.title
-            book.Author = b.author
-            book.Year = b.year
-    
-            book_data.push(book)
-        }
-    });
-
-    return book_data
-}
