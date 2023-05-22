@@ -52,8 +52,8 @@ class xml{
             rows += '<tr>' +
                         '<td class="th_td">' + book.id + '</td>' +
                         '<td class="th_td">' + book.title + '</td>' +
-                        '<td class="th_td">' + book.author + '</td>' +
-                        '<td class="th_td">' + book.year + '</td>' +
+                        '<td class="th_td hidden">' + book.author + '</td>' +
+                        '<td class="th_td hidden">' + book.year + '</td>' +
                         '<td class="th_td">' +
                             '<form action="/edit" method="post" id="form-edit">' +
                                 '<input type="hidden" name="id" value="' + book.id + '">' +

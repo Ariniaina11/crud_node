@@ -1,58 +1,38 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <library>
-  <book id="28">
-    <title>KJH</title>
-    <author>kjh</author>
-    <year>1778</year>
+  <book id="1">
+    <title>Le Seigneur des Anneaux</title>
+    <author>J.R.R. Tolkien</author>
+    <year>1954</year>
   </book>
-  <book id="29">
-    <title>sqldkj</title>
-    <author>lkjl</author>
-    <year>0987</year>
+  <book id="2">
+    <title>Orgueil et Préjugés</title>
+    <author>Jane Austen</author>
+    <year>1813</year>
   </book>
-  <book id="30">
-    <title>kqsdjh</title>
-    <author>kjhk</author>
-    <year>888</year>
+  <book id="3">
+    <title>To Kill a Mockingbird</title>
+    <author>Harper Lee</author>
+    <year>1960</year>
   </book>
-  <book id="31">
-    <title>j</title>
-    <author>kjh</author>
-    <year>2000</year>
+  <book id="4">
+    <title>Catcher in the Rye</title>
+    <author>J.D. Salinger</author>
+    <year>1951</year>
   </book>
-  <book id="32">
-    <title>joujou</title>
-    <author>jhj</author>
-    <year>2000</year>
+  <book id="5">
+    <title>Pride and Prejudice</title>
+    <author>Jane Austen</author>
+    <year>1813</year>
   </book>
-  <book id="33">
-    <title>kjh</title>
-    <author>KAjih</author>
-    <year>2003</year>
+  <book id="6">
+    <title>Frankenstein</title>
+    <author>Mary Shelley</author>
+    <year>1818</year>
   </book>
-  <book id="34">
-    <title>Lolita</title>
-    <author>Mim's</author>
-    <year>2001</year>
-  </book>
-  <book id="35">
-    <title>Bournii</title>
-    <author>LOL</author>
-    <year>1778</year>
-  </book>
-  <book id="36">
-    <title>kjh</title>
-    <author>jkhkjh</author>
-    <year>1999</year>
-  </book>
-  <book id="37">
-    <title>kjhkjh</title>
-    <author>kjhkh</author>
-    <year>1576</year>
-  </book>
-  <book id="39">
-    <title>Metaminer Mada</title>
-    <author>LOL</author>
-    <year>2003</year>
+  <book id="7">
+    <title>The Picture of Dorian Gray</title>
+    <author>Oscar Wilde</author>
+    <year>1890</year>
   </book>
 </library>
